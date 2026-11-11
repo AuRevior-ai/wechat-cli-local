@@ -4,7 +4,11 @@ import os
 import struct
 import tempfile
 import unittest
+import sys
 from unittest.mock import patch
+
+if sys.platform != "win32":
+    raise unittest.SkipTest("Windows scanner tests")
 
 from wechat_cli.keys import scanner_windows
 

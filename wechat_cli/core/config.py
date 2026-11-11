@@ -71,7 +71,7 @@ def _detect_db_dir_candidates_windows():
     candidates = []
     for root in data_roots:
         pattern = os.path.join(root, "xwechat_files", "*", "db_storage")
-        for match in glob_mod.glob(pattern):
+        for match in sorted(glob_mod.glob(pattern)):
             normalized = os.path.normcase(os.path.normpath(match))
             if os.path.isdir(match) and normalized not in seen:
                 seen.add(normalized)

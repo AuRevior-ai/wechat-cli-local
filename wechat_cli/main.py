@@ -1,6 +1,7 @@
 """wechat-cli 入口"""
 
 import sys
+from functools import wraps
 
 import click
 
@@ -42,21 +43,29 @@ def cli(ctx, config_path):
       wechat-cli invite-trace "群名"                # 群邀请历史溯源明细
       wechat-cli ai-package "群名" --output ai.zip  # 生成 AI 聊天资料包
     """
-    # sns 使用独立 minimal context；send-text 自行按 --probe/发送模式决定是否加载 AppContext；init/web/version 也不需要 AppContext。
+    # SNS manages a separate context. Other queries load theirs after argument parsing.
     if ctx.invoked_subcommand == "sns":
         ctx.obj = {"config_path": config_path}
-        return
-    if ctx.invoked_subcommand in ("init", "web", "version", "send-text"):
-        return
 
-    try:
-        ctx.obj = AppContext(config_path)
-    except FileNotFoundError as e:
-        click.echo(str(e), err=True)
-        sys.exit(1)
-    except Exception as e:
-        click.echo(f"初始化失败: {e}", err=True)
-        sys.exit(1)
+
+def _with_app_context(callback):
+    """Initialize account data only when a parsed query actually executes."""
+    @wraps(callback)
+    def execute(*args, **kwargs):
+        ctx = click.get_current_context()
+        if ctx.obj is None:
+            config_path = ctx.find_root().params.get("config_path")
+            try:
+                ctx.obj = AppContext(config_path)
+            except FileNotFoundError as exc:
+                click.echo(str(exc), err=True)
+                ctx.exit(1)
+            except Exception as exc:
+                click.echo(f"初始化失败: {exc}", err=True)
+                ctx.exit(1)
+        return callback(*args, **kwargs)
+
+    return execute
 
 
 # 注册子命令
@@ -80,25 +89,16 @@ from .commands.sns import sns
 from .commands.send_text import send_text
 from .commands.draft_identity_probe import draft_identity_probe
 
-cli.add_command(init)
-cli.add_command(sessions)
-cli.add_command(history)
-cli.add_command(search)
-cli.add_command(contacts)
-cli.add_command(new_messages)
-cli.add_command(members)
-cli.add_command(export)
-cli.add_command(stats)
-cli.add_command(unread)
-cli.add_command(favorites)
-cli.add_command(web)
-cli.add_command(media)
-cli.add_command(invite_stats)
-cli.add_command(invite_trace)
-cli.add_command(ai_package)
-cli.add_command(sns)
-cli.add_command(send_text)
-cli.add_command(draft_identity_probe)
+for command in (
+    init, sessions, history, search, contacts, new_messages, members, export,
+    stats, unread, favorites, web, media, invite_stats, invite_trace,
+    ai_package, sns, send_text, draft_identity_probe,
+):
+    if command not in (init, web, media, sns, send_text):
+        command.callback = _with_app_context(command.callback)
+    cli.add_command(command)
+
+media.commands["export"].callback = _with_app_context(media.commands["export"].callback)
 
 
 if __name__ == "__main__":

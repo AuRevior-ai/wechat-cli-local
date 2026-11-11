@@ -9,6 +9,7 @@ from __future__ import annotations
 import ipaddress
 import json
 import mimetypes
+import ntpath
 import os
 import re
 import secrets
@@ -650,10 +651,10 @@ def claim_ai_package_download(token: str) -> dict[str, Any] | None:
 
 
 def _account_name_from_db_dir(path: str) -> str:
-    normalized = os.path.normpath(path)
-    if os.path.basename(normalized) == "db_storage":
-        return os.path.basename(os.path.dirname(normalized))
-    return os.path.basename(normalized)
+    normalized = ntpath.normpath(path)
+    if ntpath.basename(normalized) == "db_storage":
+        return ntpath.basename(ntpath.dirname(normalized))
+    return ntpath.basename(normalized)
 
 
 def db_dir_candidates_payload() -> dict[str, Any]:

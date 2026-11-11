@@ -93,9 +93,11 @@ class LocalEditionTests(unittest.TestCase):
 
     def test_all_cli_help_commands_load_without_local_account_data(self):
         runner = CliRunner()
-        for command in ["history", "search", "contacts", "web", "invite-trace", "send-text"]:
-            with self.subTest(command=command):
-                result = runner.invoke(cli, [command, "--help"])
+        for command in ["history", "search", "contacts", "web", "invite-trace", "send-text", "media export"]:
+            with self.subTest(command=command), patch(
+                "wechat_cli.main.AppContext", side_effect=AssertionError("Help must not load account data")
+            ):
+                result = runner.invoke(cli, [*command.split(), "--help"])
                 self.assertEqual(0, result.exit_code, result.output)
 
     def test_package_has_no_imports_of_removed_product_modules(self):

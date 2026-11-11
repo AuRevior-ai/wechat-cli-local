@@ -11,7 +11,7 @@ class SnsMediaCandidateTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
-        self.root = Path(self.tmp.name)
+        self.root = Path(self.tmp.name).resolve()
         self.account = self.root / "account"
         self.db_dir = self.account / "db_storage"
         self.db_dir.mkdir(parents=True)
@@ -124,7 +124,7 @@ class SnsMediaIdentityTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
-        self.root = Path(self.tmp.name)
+        self.root = Path(self.tmp.name).resolve()
         self.account = self.root / "account"
         self.db_dir = self.account / "db_storage"
         self.db_dir.mkdir(parents=True)

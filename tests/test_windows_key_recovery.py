@@ -7,7 +7,11 @@ from pathlib import Path
 import struct
 import tempfile
 import unittest
+import sys
 from unittest.mock import patch
+
+if sys.platform != "win32":
+    raise unittest.SkipTest("Windows process-memory tests")
 
 from wechat_cli.keys import scanner_windows as scanner
 from wechat_cli.keys.common import scan_memory_for_keys

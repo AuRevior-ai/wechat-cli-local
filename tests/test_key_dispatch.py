@@ -1,10 +1,12 @@
 import unittest
+import sys
 from unittest.mock import patch
 
 from wechat_cli import keys
 
 
 class KeyScannerDispatchTests(unittest.TestCase):
+    @unittest.skipUnless(sys.platform == "win32", "Windows scanner dispatch")
     def test_forwards_custom_logger_to_windows_scanner(self):
         logger = object()
         with patch.object(
