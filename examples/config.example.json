@@ -1,0 +1,6 @@
+{
+  "db_dir": "C:/path/to/xwechat_files/your-account/db_storage",
+  "keys_file": "C:/path/to/local-state/all_keys.json",
+  "decrypted_dir": "C:/path/to/local-state/decrypted",
+  "wechat_process": "Weixin.exe"
+}

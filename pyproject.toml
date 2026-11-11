@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wechat-cli-local"
+version = "0.5.0"
+description = "Local WeChat CLI and browser interface for code study"
+readme = "README.md"
+authors = [{ name = "Au Revior" }]
+requires-python = ">=3.10"
+dependencies = [
+    "click>=8.1,<9",
+    "pycryptodome>=3.19,<4",
+    "zstandard>=0.22,<1",
+]
+
+[project.optional-dependencies]
+outbound = ["pywinauto>=0.6.8,<0.7; sys_platform == 'win32'"]
+
+[project.scripts]
+wechat-cli = "wechat_cli.main:cli"
+
+[tool.setuptools.packages.find]
+include = ["wechat_cli*"]
+
+[tool.setuptools.package-data]
+wechat_cli = ["bin/*", "web/static/*"]

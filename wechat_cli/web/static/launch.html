@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WeChatCLI 发售运营台</title>
+  <link rel="stylesheet" href="/static/launch.css?v=20260819-launch4">
+</head>
+<body>
+  <div class="launch-app">
+    <aside class="rail" aria-label="发售运营台导航">
+      <a class="brand-mark" href="/launch" aria-label="发售运营台首页">W</a>
+      <nav class="rail-nav">
+        <button class="rail-button active" type="button" data-screen="dashboard" aria-label="总览">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          <span>总览</span>
+        </button>
+        <button class="rail-button" type="button" data-screen="groups" aria-label="群列表">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3.5"/><path d="M2.5 20v-1.5A4.5 4.5 0 0 1 7 14h2a4.5 4.5 0 0 1 4.5 4.5V20M16 4.5a3.5 3.5 0 0 1 0 7M17.5 14a4 4 0 0 1 4 4V20"/></svg>
+          <span>群列表</span>
+        </button>
+        <button class="rail-button" type="button" data-screen="trace" aria-label="溯源">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6" r="2.3"/><circle cx="18" cy="7" r="2.3"/><circle cx="12" cy="18" r="2.3"/><path d="M8.2 6.2l7.5.5M7.2 8l3.8 7.8M16.8 9l-3.6 6.8"/></svg>
+          <span>溯源</span>
+        </button>
+        <button class="rail-button" type="button" data-screen="fanout" aria-label="群发">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.5 2.5 14.8 21l-4.1-8-8.2-3.8 19-6.7Z"/><path d="m21.5 2.5-10.8 10.5"/></svg>
+          <span>群发</span>
+        </button>
+      </nav>
+      <div class="rail-footer">
+        <a href="/" title="返回通用 WeChatCLI Web">通用工具</a>
+        <span>Au Revior</span>
+      </div>
+    </aside>
+
+    <div class="app-body">
+      <header class="topbar">
+        <div class="product-title">
+          <span class="eyebrow">WECHATCLI · LAUNCH OPS</span>
+          <strong>发售运营台</strong>
+        </div>
+        <div class="campaign-control">
+          <label for="campaign-select">当前活动</label>
+          <select id="campaign-select" aria-label="切换当前发售活动">
+            <option value="">正在读取活动…</option>
+          </select>
+        </div>
+        <div class="topbar-spacer"></div>
+        <button id="health-button" class="health-pill health-starting" type="button" title="查看监听状态">
+          <span class="health-dot" aria-hidden="true"></span>
+          <span id="health-label">监听节点 · 检查中</span>
+        </button>
+        <a class="generic-web-link" href="/">通用 WeChatCLI</a>
+      </header>
+
+      <main class="workspace">
+        <section id="dashboard" class="screen active" data-screen="dashboard">
+          <div class="page-head">
+            <div>
+              <span class="section-code">01 / OVERVIEW</span>
+              <h1>总览</h1>
+              <p id="dashboard-subtitle">当前活动的群规模、入群节奏与邀请增长。</p>
+            </div>
+            <div class="page-actions">
+              <button id="dashboard-export" class="button secondary" type="button">导出报表</button>
+              <button id="manage-campaign" class="button primary" type="button">管理活动</button>
+            </div>
+          </div>
+
+          <div class="metrics" aria-label="活动核心指标">
+            <article class="metric-card">
+              <span>监听节点</span>
+              <strong id="metric-health" class="metric-green">检查中</strong>
+              <small id="metric-health-detail">正在读取本机监听状态</small>
+            </article>
+            <article class="metric-card">
+              <span>活动群数</span>
+              <strong id="metric-room-count">—</strong>
+              <small>当前 Campaign 内微信群</small>
+            </article>
+            <article class="metric-card">
+              <span>当前成员</span>
+              <strong id="metric-members">—</strong>
+              <small>活动群当前成员合计</small>
+            </article>
+            <article class="metric-card">
+              <span>今日新增</span>
+              <strong id="metric-joined" class="metric-green">—</strong>
+              <small>来自可靠入群事实</small>
+            </article>
+            <article class="metric-card">
+              <span>今日退群</span>
+              <strong id="metric-left" class="metric-ochre">暂不可用</strong>
+              <small id="metric-left-detail">仅在可靠识别后显示</small>
+            </article>
+          </div>
+
+          <div class="dashboard-fill">
+            <article class="panel chart-panel">
+              <div class="panel-head">
+                <div>
+                  <span class="panel-kicker">INVITE DISTRIBUTION</span>
+                  <h2>邀请人数分布</h2>
+                  <p id="invite-bars-scope-label">活动累计 · 按邀请人数从高到低</p>
+                </div>
+                <button id="chart-download" class="button subtle" type="button">下载数据</button>
+              </div>
+              <div id="invite-bars" class="invite-bars-scroll" aria-label="邀请人数横向柱状图">
+                <div class="chart-empty">等待邀请数据…</div>
+              </div>
+            </article>
+
+            <article class="panel ranking-panel">
+              <div class="panel-head">
+                <div>
+                  <span class="panel-kicker">INVITE RANKING</span>
+                  <h2>邀请排行</h2>
+                  <p id="ranking-scope-label">活动累计 · 点击成员可继续查看溯源详情</p>
+                </div>
+                <div class="ranking-tools">
+                  <label class="ranking-window-label" for="invite-window">统计范围</label>
+                  <select id="invite-window" class="compact-select" aria-label="邀请排行统计范围">
+                    <option value="campaign" selected>活动累计</option>
+                    <option value="7d">近 7 天</option>
+                    <option value="today">今日</option>
+                  </select>
+                  <button id="ranking-open-trace" class="button subtle" type="button">查看全部</button>
+                </div>
+              </div>
+              <div id="invite-ranking" class="ranking-list invite-ranking-scroll">
+                <div class="panel-empty">暂无邀请排行</div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="groups" class="screen" data-screen="groups">
+          <div class="page-head">
+            <div>
+              <span class="section-code">02 / ROOMS</span>
+              <h1>群列表</h1>
+              <p>每个群都保留足够的运营信息；第四个群开始向下滚动查看。</p>
+            </div>
+            <div class="page-actions">
+              <button id="export-all-members" class="button secondary" type="button">导出全部成员</button>
+              <button id="add-groups-button" class="button primary" type="button">添加群到活动</button>
+            </div>
+          </div>
+
+          <div class="filterbar">
+            <label>
+              <span>范围</span>
+              <select id="group-range">
+                <option value="campaign">当前活动群</option>
+                <option value="all">全部已发现群</option>
+              </select>
+            </label>
+            <label class="filter-grow">
+              <span>搜索群名</span>
+              <input id="group-query" type="search" placeholder="输入群名称">
+            </label>
+            <label>
+              <span>监听状态</span>
+              <select id="group-health-filter">
+                <option value="">全部</option>
+                <option value="running">正常</option>
+                <option value="error">异常</option>
+              </select>
+            </label>
+            <button id="group-filter-apply" class="button primary compact" type="button">筛选</button>
+          </div>
+
+          <div id="group-list" class="group-list" aria-live="polite">
+            <div class="loading-block">正在读取群聊…</div>
+          </div>
+        </section>
+
+        <section id="trace" class="screen" data-screen="trace">
+          <div class="page-head">
+            <div>
+              <span class="section-code">03 / TRACE</span>
+              <h1>溯源</h1>
+              <p>主页面只回答“谁把谁拉进来了”；消息、多媒体与 AI 放在二级下钻。</p>
+            </div>
+            <div class="page-actions">
+              <button id="trace-ranking" class="button secondary" type="button">邀请排行</button>
+              <button id="trace-export" class="button primary" type="button">导出溯源</button>
+            </div>
+          </div>
+
+          <div class="filterbar trace-filters">
+            <label>
+              <span>群</span>
+              <select id="trace-room-filter">
+                <option value="">全部活动群</option>
+              </select>
+            </label>
+            <label class="filter-grow">
+              <span>成员 / 邀请人</span>
+              <input id="trace-query" type="search" placeholder="输入昵称或标识">
+            </label>
+            <label>
+              <span>邀请方式</span>
+              <select id="trace-method">
+                <option value="">全部方式</option>
+                <option value="direct">直接邀请</option>
+                <option value="qr">二维码</option>
+                <option value="unattributed_qr">二维码 · 待归因</option>
+              </select>
+            </label>
+            <label>
+              <span>开始日期</span>
+              <input id="trace-start" type="date">
+            </label>
+            <label>
+              <span>结束日期</span>
+              <input id="trace-end" type="date">
+            </label>
+            <button id="trace-filter-apply" class="button primary compact" type="button">筛选</button>
+          </div>
+
+          <div class="table-shell">
+            <table class="trace-table">
+              <thead>
+                <tr>
+                  <th>成员</th>
+                  <th>所在群</th>
+                  <th>入群时间</th>
+                  <th>邀请人</th>
+                  <th>方式</th>
+                  <th>邀请人数</th>
+                  <th>状态</th>
+                </tr>
+              </thead>
+              <tbody id="trace-table-body">
+                <tr><td colspan="7" class="table-empty">正在读取溯源数据…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="fanout" class="screen" data-screen="fanout">
+          <div class="page-head">
+            <div>
+              <span class="section-code">04 / FANOUT</span>
+              <h1>群发</h1>
+              <p>保留未来产品位置，Round 1 不提供任何主动微信写入能力。</p>
+            </div>
+          </div>
+
+          <div class="fanout-placeholder">
+            <div class="fanout-lock" aria-hidden="true">⌁</div>
+            <span class="placeholder-label">READ ONLY · ROUND 1</span>
+            <h2>独立机器人模式尚未启用</h2>
+            <p>第一轮 WeChatCLI 发售运营台仅提供只读监听、邀请溯源和数据分析，<strong>不会主动向微信发送任何消息</strong>。</p>
+            <div class="fanout-preview" aria-disabled="true">
+              <label><span>消息源头群</span><select disabled><option>选择源头群</option></select></label>
+              <label><span>主讲人</span><select disabled><option>选择主讲人</option></select></label>
+              <label class="fanout-target"><span>目标群</span><input disabled placeholder="选择一个或多个目标群"></label>
+              <label class="switch-row"><input type="checkbox" disabled><span>开启群发</span></label>
+            </div>
+            <button class="button secondary" type="button" disabled>保存群发配置</button>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <nav id="bottom-nav" class="bottom-nav" aria-label="移动端发售运营导航">
+    <button class="active" type="button" data-screen="dashboard"><span>▦</span>总览</button>
+    <button type="button" data-screen="groups"><span>♟</span>群列表</button>
+    <button type="button" data-screen="trace"><span>⌘</span>溯源</button>
+    <button type="button" data-screen="fanout"><span>➤</span>群发</button>
+  </nav>
+
+  <div id="drawer-mask" class="drawer-mask" hidden></div>
+  <aside id="member-drawer" class="member-drawer" aria-hidden="true" aria-label="成员详情">
+    <header class="drawer-head">
+      <div class="drawer-person">
+        <span id="member-drawer-avatar" class="person-avatar avatar-shell" aria-hidden="true"><span class="avatar-fallback-letter">人</span></span>
+        <div>
+          <span class="drawer-kicker">MEMBER DETAIL</span>
+          <h2 id="member-drawer-name">成员详情</h2>
+          <p id="member-drawer-meta">—</p>
+        </div>
+      </div>
+      <button id="member-drawer-close" class="icon-button" type="button" aria-label="关闭成员详情">×</button>
+    </header>
+    <div class="detail-tabs" role="tablist">
+      <button class="active" type="button" data-detail-tab="invite">邀请关系</button>
+      <button type="button" data-detail-tab="messages">相关消息</button>
+      <button type="button" data-detail-tab="media">图片表情</button>
+      <button type="button" data-detail-tab="ai">AI 洞察</button>
+    </div>
+    <div id="member-drawer-body" class="drawer-body">
+      <div class="loading-block">正在读取成员详情…</div>
+    </div>
+  </aside>
+
+  <dialog id="members-dialog" class="dialog-card">
+    <div class="dialog-head">
+      <div class="dialog-room-title"><span id="members-dialog-avatar" class="group-avatar avatar-shell" aria-hidden="true"><span class="avatar-fallback-letter group-fallback-letter">群</span></span><div><span class="dialog-kicker">ROOM MEMBERS</span><h2 id="members-dialog-title">群成员</h2></div></div>
+      <button class="icon-button" type="button" data-dialog-close="members-dialog">×</button>
+    </div>
+    <div class="dialog-toolbar">
+      <span id="members-dialog-count">0 人</span>
+      <button id="export-room-members" class="button secondary compact" type="button">导出当前群</button>
+    </div>
+    <div id="members-dialog-list" class="member-list"></div>
+  </dialog>
+
+  <dialog id="campaign-dialog" class="dialog-card campaign-dialog">
+    <div class="dialog-head">
+      <div><span class="dialog-kicker">CAMPAIGN</span><h2>活动管理</h2></div>
+      <button class="icon-button" type="button" data-dialog-close="campaign-dialog">×</button>
+    </div>
+    <section class="dialog-section">
+      <h3>当前活动</h3>
+      <div id="campaign-current-card" class="campaign-current">正在读取…</div>
+      <button id="end-campaign" class="button danger subtle-danger" type="button">结束当前活动</button>
+    </section>
+
+    <section class="dialog-section">
+      <h3>新建活动</h3>
+      <div class="inline-form">
+        <input id="new-campaign-name" type="text" maxlength="80" placeholder="输入活动名称">
+        <button id="create-campaign" class="button primary" type="button">创建</button>
+      </div>
+    </section>
+    <section class="dialog-section">
+      <div class="section-row"><h3>添加微信群</h3><span>只显示本机真实发现的群</span></div>
+      <div id="campaign-room-picker" class="room-picker">正在读取本机群聊…</div>
+      <button id="add-selected-rooms" class="button primary" type="button">加入所选群</button>
+    </section>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <script src="/static/launch.js?v=20260819-launch4" defer></script>
+</body>
+</html>

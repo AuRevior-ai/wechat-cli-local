@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WeChat CLI Web</title>
+  <link rel="stylesheet" href="/static/app.css?v=20260729-author-support">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <span id="profile-avatar" class="brand-mark"><span aria-hidden="true">W</span></span>
+        <div>
+          <strong>WeChat CLI Web</strong>
+          <small id="profile-name">正在读取账号…</small>
+          <span class="brand-author">作者 Au Revior</span>
+        </div>
+      </div>
+      <nav id="nav" class="nav">
+        <button data-target="dashboard" class="active">总览</button>
+        <button data-target="setup">初始化</button>
+        <button data-target="history">聊天记录</button>
+        <button data-target="sns">朋友圈</button>
+        <button data-target="search">消息搜索</button>
+        <button data-target="contacts">联系人</button>
+        <button data-target="members">群聊成员统计和导出</button>
+        <button data-target="stats">单个聊天数据统计</button>
+        <button data-target="invite-stats">群聊成员邀请统计</button>
+        <button class="about-nav" data-target="about-support"><span>关于与支持</span>
+          <small>作者 Au Revior</small>
+        </button>
+      </nav>
+    </aside>
+
+    <main class="workspace">
+      <header class="topbar">
+        <div>
+          <p class="kicker">本机微信数据控制台</p>
+          <h1 id="screen-title">总览</h1>
+        </div>
+        <div class="status-strip">
+          <span id="init-pill" class="pill muted">检查中</span>
+          <button id="refresh-status" class="icon-button" title="刷新状态" type="button">↻</button>
+        </div>
+      </header>
+
+      <section id="dashboard" class="screen active" data-title="总览">
+        <div class="dashboard-grid">
+          <section class="panel status-panel">
+            <div class="panel-head">
+              <span class="label">状态</span>
+              <button class="ghost" data-action="refresh-status" type="button">刷新</button>
+            </div>
+            <dl id="status-list" class="status-list"></dl>
+          </section>
+        </div>
+      </section>
+
+      <section id="setup" class="screen" data-title="初始化">
+        <form class="tool-form" data-command="init">
+          <div class="form-grid two">
+            <label class="full">检测到的微信目录
+              <span class="inline-control">
+                <select id="db-dir-candidates">
+                  <option value="">检测中</option>
+                </select>
+                <button id="detect-db-dirs" class="ghost" type="button">检测目录</button>
+              </span>
+            </label>
+            <label class="full">微信 db_storage 目录
+              <input id="setup-db-dir" data-param="db_dir" placeholder="可手动粘贴或从上方选择">
+            </label>
+            <label class="checkline">
+              <input data-param="force" type="checkbox">
+              <span>强制重新提取密钥</span>
+            </label>
+          </div>
+          <button class="primary" type="submit">开始初始化</button>
+        </form>
+      </section>
+
+      <section id="history" class="screen" data-title="聊天记录">
+        <form class="tool-form summary-form" data-command="history" data-result-mode="summary">
+          <div class="summary-form-intro">
+            <span>CHAT RECORDS</span>
+            <strong>选择聊天与日期，直接整理并复制记录</strong>
+            <p>从本机微信数据库读取；可复制完整材料给 AI，也可只复制精简信息。</p>
+          </div>
+          <div class="form-grid summary-form-grid">
+            <label class="full">选择聊天
+              <div id="history-chat-picker" class="session-picker" data-session-picker data-filter="all" data-multiple="false">
+                <input class="session-picker-search" type="search" role="combobox"
+                  aria-autocomplete="list" aria-controls="history-chat-options"
+                  aria-expanded="false" aria-activedescendant="" autocomplete="off"
+                  placeholder="输入群名、联系人或账号进行搜索">
+                <input class="session-picker-value" data-param="chat_name" type="hidden">
+                <div id="history-chat-options" class="session-picker-options"
+                  role="listbox" hidden></div>
+                <small class="session-picker-hint">正在读取会话列表…</small>
+                <button class="session-picker-retry hidden" type="button">重新读取会话</button>
+              </div>
+            </label>
+            <label>开始日期
+              <input class="date-input" data-param="start_time" type="date" data-default-today required>
+            </label>
+            <label>结束日期
+              <input class="date-input" data-param="end_time" type="date" data-default-today required>
+            </label>
+            <input data-param="limit" type="hidden" value="50000">
+          </div>
+          <div class="summary-submit-row">
+            <div>
+              <p>网页不会上传聊天内容；AI 资料包也只在本机生成。</p>
+              <label class="package-transcribe">
+                <input id="ai-package-transcribe" type="checkbox" checked>
+                <span>将语音离线识别为文字</span>
+              </label>
+            </div>
+            <div class="summary-submit-actions">
+              <button id="build-ai-package" class="package-button" type="button">
+                <span>生成 AI 资料包</span>
+                <small>图片、表情、语音与合并转发</small>
+              </button>
+              <button class="primary" type="submit">读取聊天记录</button>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <section id="sns" class="screen" data-title="朋友圈">
+        <form class="tool-form sns-form" data-command="sns">
+          <div class="sns-form-intro">
+            <span>SNS TIMELINE</span>
+            <strong>只读浏览本机朋友圈</strong>
+            <p>从本机微信 SNS 数据库读取；不发布、不点赞、不评论，也不会请求远程媒体。</p>
+          </div>
+          <div class="form-grid">
+            <label>关键词
+              <input data-param="query" type="search" placeholder="搜索朋友圈正文">
+            </label>
+            <label>发布者
+              <input data-param="user" type="text" placeholder="昵称、备注或 wxid">
+            </label>
+            <label>开始日期
+              <input class="date-input" data-param="start_time" type="date">
+            </label>
+            <label>结束日期
+              <input class="date-input" data-param="end_time" type="date">
+            </label>
+          </div>
+          <div class="sns-form-actions">
+            <button class="primary" type="submit">查询朋友圈</button>
+            <button class="ghost" type="button" id="sns-reset">重置</button>
+          </div>
+        </form>
+        <div class="sns-stage" aria-live="polite">
+          <div id="sns-local-error" class="sns-local-error" hidden></div>
+          <div id="sns-loading" class="sns-loading" hidden>正在读取朋友圈…</div>
+          <div id="sns-empty" class="sns-empty">提交查询后，朋友圈会按最新记录开始显示。</div>
+          <div id="sns-timeline" class="sns-timeline"></div>
+          <div class="sns-load-row">
+            <button type="button" id="sns-load-more" class="ghost" hidden>加载更多</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="search" class="screen" data-title="消息搜索">
+        <form class="tool-form" data-command="search">
+          <div class="form-grid">
+            <label>关键词
+              <input data-param="keyword" placeholder="留空时必须填写开始和结束时间">
+            </label>
+            <label class="full">限定聊天（可多选）
+              <div id="search-chat-picker" class="session-picker" data-session-picker data-filter="all" data-multiple="true">
+                <input class="session-picker-search" type="search" role="combobox"
+                  aria-autocomplete="list" aria-controls="search-chat-options"
+                  aria-expanded="false" aria-activedescendant="" autocomplete="off"
+                  placeholder="搜索后选择多个群聊或联系人">
+                <div class="session-picker-chips" hidden></div>
+                <input class="session-picker-value" data-param="chat" data-list="lines" type="hidden">
+                <div id="search-chat-options" class="session-picker-options"
+                  role="listbox" aria-multiselectable="true" hidden></div>
+                <small class="session-picker-hint">可不选择；默认搜索全部聊天</small>
+                <button class="session-picker-retry hidden" type="button">重新读取会话</button>
+              </div>
+            </label>
+            <label>开始时间
+              <input class="date-input" data-param="start_time" type="date">
+            </label>
+            <label>结束时间
+              <input class="date-input" data-param="end_time" type="date">
+            </label>
+            <label>数量
+              <input data-param="limit" type="number" min="1" max="500" value="20">
+            </label>
+            <label>偏移
+              <input data-param="offset" type="number" min="0" value="0">
+            </label>
+            <label>消息类型
+              <select data-param="type">
+                <option value="">全部</option>
+                <option value="text">文本</option>
+                <option value="image">图片</option>
+                <option value="voice">语音</option>
+                <option value="video">视频</option>
+                <option value="sticker">表情</option>
+                <option value="location">位置</option>
+                <option value="link">链接</option>
+                <option value="file">文件</option>
+                <option value="call">通话</option>
+                <option value="system">系统</option>
+              </select>
+            </label>
+          </div>
+          <button class="primary" type="submit">搜索</button>
+        </form>
+      </section>
+
+      <section id="contacts" class="screen" data-title="联系人">
+        <form class="tool-form" data-command="contacts">
+          <div class="form-grid">
+            <label>搜索关键词
+              <input data-param="query" placeholder="昵称、备注、wxid">
+            </label>
+            <label>查看详情
+              <input data-param="detail" placeholder="昵称、备注或 wxid">
+            </label>
+            <label>数量
+              <input data-param="limit" type="number" min="1" value="50">
+            </label>
+          </div>
+          <button class="primary" type="submit">查询联系人</button>
+        </form>
+      </section>
+
+      <section id="members" class="screen" data-title="群聊成员统计和导出">
+        <form class="tool-form" data-command="members">
+          <div class="form-grid compact">
+            <label class="full">选择群聊
+              <div id="members-group-picker" class="session-picker" data-session-picker data-filter="group" data-multiple="false">
+                <input class="session-picker-search" type="search" role="combobox"
+                  aria-autocomplete="list" aria-controls="members-group-options"
+                  aria-expanded="false" aria-activedescendant="" autocomplete="off"
+                  placeholder="输入群名称或群账号进行搜索">
+                <input class="session-picker-value" data-param="group_name" type="hidden">
+                <div id="members-group-options" class="session-picker-options"
+                  role="listbox" hidden></div>
+                <small class="session-picker-hint">正在读取群聊列表…</small>
+                <button class="session-picker-retry hidden" type="button">重新读取群聊</button>
+              </div>
+            </label>
+          </div>
+          <button class="primary" type="submit">列出成员</button>
+        </form>
+      </section>
+
+      <section id="stats" class="screen" data-title="单个聊天数据统计">
+        <form class="tool-form" data-command="stats">
+          <div class="form-grid">
+            <label class="full">选择聊天
+              <div id="stats-chat-picker" class="session-picker" data-session-picker data-filter="all" data-multiple="false">
+                <input class="session-picker-search" type="search" role="combobox"
+                  aria-autocomplete="list" aria-controls="stats-chat-options"
+                  aria-expanded="false" aria-activedescendant="" autocomplete="off"
+                  placeholder="输入群名、联系人或账号进行搜索">
+                <input class="session-picker-value" data-param="chat_name" type="hidden">
+                <div id="stats-chat-options" class="session-picker-options"
+                  role="listbox" hidden></div>
+                <small class="session-picker-hint">正在读取会话列表…</small>
+                <button class="session-picker-retry hidden" type="button">重新读取会话</button>
+              </div>
+            </label>
+            <label>开始时间
+              <input class="date-input" data-param="start_time" type="date">
+            </label>
+            <label>结束时间
+              <input class="date-input" data-param="end_time" type="date">
+            </label>
+          </div>
+          <button class="primary" type="submit">生成统计</button>
+        </form>
+      </section>
+
+      <section id="invite-stats" class="screen" data-title="群聊成员邀请统计">
+        <form class="tool-form invite-stats-form" data-command="invite-stats">
+          <div class="invite-form-intro">
+            <span>GROUP INVITE LEDGER</span>
+            <strong>按唯一被邀请人数排行</strong>
+            <p><b>统计范围：从微信数据库记载的日子开始。</b>读取当前可见的全部群系统提示；二维码入群归属于二维码分享者。</p>
+          </div>
+          <div class="form-grid">
+            <label class="full">选择群聊
+              <div id="invite-group-picker" class="session-picker" data-session-picker data-filter="group" data-multiple="false">
+                <input class="session-picker-search" type="search" role="combobox"
+                  aria-autocomplete="list" aria-controls="invite-group-options"
+                  aria-expanded="false" aria-activedescendant="" autocomplete="off"
+                  placeholder="输入群名称或群账号进行搜索">
+                <input class="session-picker-value" data-param="group_name" type="hidden">
+                <div id="invite-group-options" class="session-picker-options"
+                  role="listbox" hidden></div>
+                <small class="session-picker-hint">正在读取群聊列表…</small>
+                <button class="session-picker-retry hidden" type="button">重新读取群聊</button>
+              </div>
+            </label>
+            <label>开始日期（可不选）
+              <input class="date-input" data-param="start_time" type="date">
+            </label>
+            <label>结束日期（可不选）
+              <input class="date-input" data-param="end_time" type="date">
+            </label>
+            <label class="full">历史昵称绑定
+              <textarea data-param="bind_identity" rows="4"
+                placeholder="每行一个：历史昵称=wxid_xxx"></textarea>
+              <small>仅在当前群成员无法精确匹配历史昵称时填写；不会进行模糊合并。</small>
+            </label>
+          </div>
+          <button class="primary" type="submit">生成邀请统计</button>
+        </form>
+      </section>
+
+
+
+      <section id="about-support" class="screen" data-title="关于与支持">
+        <div class="about-support">
+          <header class="about-support-hero">
+            <span>AUTHOR &amp; SUPPORT</span>
+            <h2>由 Au Revior 制作</h2>
+            <p>感谢使用 WeChat CLI Web。二维码仅在本机展示，不会上传网络。</p>
+          </header>
+          <div class="about-support-grid">
+            <article class="about-support-card contact">
+              <div>
+                <span class="about-card-kicker">CONTACT</span>
+                <h3>添加作者微信</h3>
+                <p>交流使用体验、问题反馈与功能建议。</p>
+              </div>
+              <a href="/static/au-revior-wechat.jpg" target="_blank" rel="noopener"
+                aria-label="查看 Au Revior 的微信二维码原图">
+                <img src="/static/au-revior-wechat.jpg"
+                  alt="Au Revior 的微信二维码" loading="lazy">
+              </a>
+            </article>
+            <article class="about-support-card payment">
+              <div>
+                <span class="about-card-kicker">SUPPORT</span>
+                <h3>支持作者</h3>
+                <p>如果这个工具帮助了你，可以自愿支持后续维护。</p>
+              </div>
+              <a href="/static/au-revior-payment.jpg" target="_blank" rel="noopener"
+                aria-label="查看 Au Revior 的微信收款码原图">
+                <img src="/static/au-revior-payment.jpg"
+                  alt="Au Revior 的微信收款码" loading="lazy">
+              </a>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="result-area">
+        <div class="result-head">
+          <div>
+            <span class="label">结果</span>
+            <code id="command-preview">等待操作</code>
+          </div>
+          <div class="result-actions">
+            <button id="copy-result" class="ghost" type="button">复制</button>
+            <button id="copy-key-result" class="ghost hidden" type="button">复制精简信息</button>
+            <button id="download-result" class="ghost hidden" type="button">下载</button>
+          </div>
+        </div>
+        <div id="result" class="result empty">请选择左侧功能并提交。</div>
+      </section>
+    </main>
+  </div>
+  <script src="/static/app.js?v=20260729-author-support"></script>
+</body>
+</html>
